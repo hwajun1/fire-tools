@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FIRE Tools - 재테크 도구 모음
 
-## Getting Started
+재테크에 필요한 계산기 모음 웹사이트.
 
-First, run the development server:
+## 도구 목록
+
+| 도구 | 경로 | 설명 |
+|------|------|------|
+| FIRE 은퇴 계산기 | [외부 링크](https://fire-calculator.streamlit.app) | 자산 추이 시뮬레이션 |
+| 연봉 실수령액 계산기 | `/salary` | 4대보험 + 소득세 공제 후 월 실수령액 (2026년 기준) |
+| 전월세 전환 계산기 | `/rent-convert` | 전세↔월세 전환 + 투자 수익률 대비 손익 분석 |
+| 대출 상환 계산기 | `/loan` | 원리금균등·원금균등·체증식 비교 + 조기상환 손익 분석 |
+
+## 기술 스택
+
+- Next.js 14+ (App Router)
+- TypeScript
+- Tailwind CSS + shadcn/ui
+- Recharts (차트)
+- Vitest (테스트)
+
+## 시작하기
+
+### 필수 조건
+
+- **Node.js** 18.17 이상 (권장: 20+)
+- **npm** 9 이상
+
+Node.js가 설치되어 있지 않다면:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# macOS (Homebrew)
+brew install node
+
+# 또는 nvm으로 설치
+nvm install 20
+nvm use 20
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 설치 및 실행
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 1. 의존성 설치 (최초 1회, 또는 package.json 변경 시)
+npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 2. 개발 서버 실행
+npm run dev
+```
 
-## Learn More
+브라우저에서 [http://localhost:3000](http://localhost:3000) 접속.
 
-To learn more about Next.js, take a look at the following resources:
+### 테스트
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# 전체 테스트 실행
+npm run test:run
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 워치 모드 (파일 변경 시 자동 재실행)
+npm test
+```
 
-## Deploy on Vercel
+### 빌드
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 프로젝트 구조
+
+```
+app/
+├── page.tsx                # 허브 페이지 (/)
+├── salary/page.tsx         # 연봉 실수령액 계산기
+├── rent-convert/page.tsx   # 전월세 전환 계산기
+├── loan/page.tsx           # 대출 상환 계산기
+├── robots.ts               # SEO
+└── sitemap.ts              # SEO
+
+lib/
+├── constants.ts            # 2026년 세율/요율 상수
+├── format.ts               # 숫자 포맷 유틸
+├── salary.ts               # 연봉 실수령액 계산 로직
+├── rent-convert.ts         # 전월세 전환 계산 로직
+└── loan.ts                 # 대출 상환 계산 로직
+
+__tests__/
+├── format.test.ts
+├── salary.test.ts
+├── rent-convert.test.ts
+└── loan.test.ts
+```
+
+## 연도 업데이트
+
+매년 세율/요율이 변경되면 `lib/constants.ts`의 값을 업데이트하면 모든 계산기에 반영됩니다.
+
+## 배포
+
+Vercel에 연결하면 `main` 브랜치 push 시 자동 배포됩니다.

@@ -152,14 +152,48 @@ interface EarlyRepaymentInput {
   gracePeriod: number;
   repaymentMonth: number;
   penaltyRate: number; // %
+  earlyRepaymentAmount?: number; // 조기상환 금액 (만원). 미지정 시 잔액 전액
 }
 
 export interface EarlyRepaymentResult {
   remainingBalance: number;
-  remainingInterest: number;
+  earlyRepaymentAmount: number; // 실제 조기상환 금액
+  isPartial: boolean;           // 일부상환 여부
+  remainingInterest: number;    // 조기상환 안 했을 때 남은 이자
+  interestAfterRepayment: number; // 일부상환 후 남은 이자
+  interestSaved: number;        // 절약되는 이자
   penaltyFee: number;
   netSaving: number;
   breakevenMonth: number;
+}
+
+/** 일부상환 후 남은 스케줄의 이자 합계를 계산 */
+function calcInterestAfterPartialRepayment(
+  remainingBalance: number,
+  repayAmount: number,
+  annualRate: number,
+  remainingMonths: number,
+): number {
+  const newBalance = remainingBalance - repayAmount;
+  if (newBalance <= 0 || remainingMonths <= 0) return 0;
+
+  // 줄어든 원금으로 원리금균등 재계산
+  const monthlyRate = annualRate / 100 / 12;
+  const pmt = newBalance * monthlyRate * Math.pow(1 + monthlyRate, remainingMonths) /
+    (Math.pow(1 + monthlyRate, remainingMonths) - 1);
+
+  let balance = newBalance;
+  let totalInterest = 0;
+
+  for (let m = 0; m < remainingMonths; m++) {
+    const interest = balance * monthlyRate;
+    totalInterest += interest;
+    const principalPart = pmt - interest;
+    balance -= principalPart;
+    if (balance < 0) balance = 0;
+  }
+
+  return r1(totalInterest);
 }
 
 export function analyzeEarlyRepayment(input: EarlyRepaymentInput): EarlyRepaymentResult {
@@ -172,20 +206,40 @@ export function analyzeEarlyRepayment(input: EarlyRepaymentInput): EarlyRepaymen
   const monthIndex = Math.min(repaymentMonth - 1, full.schedule.length - 1);
   const remainingBalance = full.schedule[monthIndex].balance;
 
+  // 조기상환 금액 결정 (미지정이면 전액)
+  const repayAmount = input.earlyRepaymentAmount != null
+    ? Math.min(input.earlyRepaymentAmount, remainingBalance)
+    : remainingBalance;
+  const isPartial = repayAmount < remainingBalance;
+
+  // 조기상환 안 했을 때 남은 이자
   const remainingInterest = r1(
     full.schedule.slice(repaymentMonth).reduce((s, r) => s + r.interest, 0)
   );
 
-  const penaltyFee = r1(remainingBalance * (penaltyRate / 100));
-  const netSaving = r1(remainingInterest - penaltyFee);
+  // 일부상환 후 남은 이자
+  const remainingMonths = totalMonths - repaymentMonth;
+  const interestAfterRepayment = isPartial
+    ? calcInterestAfterPartialRepayment(remainingBalance, repayAmount, annualRate, remainingMonths)
+    : 0;
+
+  const interestSaved = r1(remainingInterest - interestAfterRepayment);
+  const penaltyFee = r1(repayAmount * (penaltyRate / 100));
+  const netSaving = r1(interestSaved - penaltyFee);
 
   // 손익분기점 찾기
   let breakevenMonth = 0;
   for (let m = 1; m < full.schedule.length; m++) {
     const bal = full.schedule[m - 1].balance;
-    const fee = bal * (penaltyRate / 100);
-    const remInt = full.schedule.slice(m).reduce((s, r) => s + r.interest, 0);
-    if (remInt > fee) {
+    const amt = input.earlyRepaymentAmount != null ? Math.min(input.earlyRepaymentAmount, bal) : bal;
+    const fee = amt * (penaltyRate / 100);
+    const remMonths = totalMonths - m;
+    const origInt = full.schedule.slice(m).reduce((s, r) => s + r.interest, 0);
+    const newInt = amt < bal
+      ? calcInterestAfterPartialRepayment(bal, amt, annualRate, remMonths)
+      : 0;
+    const saved = origInt - newInt;
+    if (saved > fee) {
       breakevenMonth = m;
       break;
     }
@@ -193,7 +247,11 @@ export function analyzeEarlyRepayment(input: EarlyRepaymentInput): EarlyRepaymen
 
   return {
     remainingBalance,
+    earlyRepaymentAmount: repayAmount,
+    isPartial,
     remainingInterest,
+    interestAfterRepayment,
+    interestSaved,
     penaltyFee,
     netSaving,
     breakevenMonth,

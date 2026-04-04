@@ -4,7 +4,7 @@ const tools = [
   {
     title: "FIRE 은퇴 계산기",
     description: "나는 몇 년 뒤에 은퇴할 수 있을까? 자산 추이 시뮬레이션",
-    href: "https://fire-calculator.streamlit.app",
+    href: "https://fire-calculator-1.streamlit.app/",
     external: true,
   },
   {

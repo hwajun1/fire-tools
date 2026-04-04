@@ -87,4 +87,35 @@ describe("analyzeEarlyRepayment", () => {
     expect(result.breakevenMonth).toBeGreaterThan(0);
     expect(result.breakevenMonth).toBeLessThan(360);
   });
+
+  it("handles partial early repayment", () => {
+    const full = analyzeEarlyRepayment({
+      principal: 10000,
+      annualRate: 4,
+      totalMonths: 360,
+      gracePeriod: 0,
+      repaymentMonth: 60,
+      penaltyRate: 1.0,
+    });
+
+    const partial = analyzeEarlyRepayment({
+      principal: 10000,
+      annualRate: 4,
+      totalMonths: 360,
+      gracePeriod: 0,
+      repaymentMonth: 60,
+      penaltyRate: 1.0,
+      earlyRepaymentAmount: 3000,
+    });
+
+    expect(partial.isPartial).toBe(true);
+    expect(partial.earlyRepaymentAmount).toBe(3000);
+    // 일부상환 시 절약 이자 < 전액상환 시 절약 이자
+    expect(partial.interestSaved).toBeGreaterThan(0);
+    expect(partial.interestSaved).toBeLessThan(full.interestSaved);
+    // 일부상환 후에도 이자가 남음
+    expect(partial.interestAfterRepayment).toBeGreaterThan(0);
+    // 수수료도 더 적음
+    expect(partial.penaltyFee).toBeLessThan(full.penaltyFee);
+  });
 });

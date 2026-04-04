@@ -33,6 +33,8 @@ export default function LoanPage() {
   const [gracePeriod, setGracePeriod] = useState(0);
   const [repaymentMonth, setRepaymentMonth] = useState(60);
   const [penaltyRate, setPenaltyRate] = useState(1.2);
+  const [isPartialRepayment, setIsPartialRepayment] = useState(false);
+  const [partialAmount, setPartialAmount] = useState(5000);
   const [showSchedule, setShowSchedule] = useState<string | null>(null);
 
   const epi = calculateEqualPrincipalInterest(principal, annualRate, years, gracePeriod);
@@ -46,6 +48,7 @@ export default function LoanPage() {
     gracePeriod,
     repaymentMonth,
     penaltyRate,
+    earlyRepaymentAmount: isPartialRepayment ? partialAmount : undefined,
   });
 
   // 차트용 데이터 (12개월 단위 샘플링)
@@ -203,7 +206,7 @@ export default function LoanPage() {
       <Card>
         <CardHeader><CardTitle>조기상환 손익 분석</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <Label htmlFor="repayMonth">조기상환 시점 (개월차)</Label>
               <Input id="repayMonth" type="number" value={repaymentMonth} onChange={(e) => setRepaymentMonth(Number(e.target.value))} min={1} max={years * 12} step={1} />
@@ -212,6 +215,29 @@ export default function LoanPage() {
               <Label htmlFor="penalty">조기상환수수료율 (%)</Label>
               <Input id="penalty" type="number" value={penaltyRate} onChange={(e) => setPenaltyRate(Number(e.target.value))} min={0} step={0.1} />
             </div>
+            <div>
+              <Label>상환 범위</Label>
+              <div className="flex gap-2 mt-1">
+                <button
+                  className={`flex-1 rounded-md border px-3 py-2 text-sm ${!isPartialRepayment ? "bg-primary text-primary-foreground" : ""}`}
+                  onClick={() => setIsPartialRepayment(false)}
+                >
+                  전액 상환
+                </button>
+                <button
+                  className={`flex-1 rounded-md border px-3 py-2 text-sm ${isPartialRepayment ? "bg-primary text-primary-foreground" : ""}`}
+                  onClick={() => setIsPartialRepayment(true)}
+                >
+                  일부 상환
+                </button>
+              </div>
+            </div>
+            {isPartialRepayment && (
+              <div>
+                <Label htmlFor="partialAmount">조기상환 금액 (만원)</Label>
+                <Input id="partialAmount" type="number" value={partialAmount} onChange={(e) => setPartialAmount(Number(e.target.value))} min={0} step={100} />
+              </div>
+            )}
           </div>
           <Separator />
           <div className="space-y-2 text-sm">
@@ -220,8 +246,22 @@ export default function LoanPage() {
               <span className="font-medium">{formatMoney(earlyResult.remainingBalance)}</span>
             </div>
             <div className="flex justify-between">
-              <span>남은 기간 이자 총액</span>
+              <span>조기상환 금액</span>
+              <span className="font-medium">{formatMoney(earlyResult.earlyRepaymentAmount)}{earlyResult.isPartial ? " (일부)" : " (전액)"}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>조기상환 없을 때 남은 이자</span>
               <span className="font-medium">{formatMoney(earlyResult.remainingInterest)}</span>
+            </div>
+            {earlyResult.isPartial && (
+              <div className="flex justify-between">
+                <span>일부상환 후 남은 이자</span>
+                <span className="font-medium">{formatMoney(earlyResult.interestAfterRepayment)}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span>절약되는 이자</span>
+              <span className="font-medium text-green-600">{formatMoney(earlyResult.interestSaved)}</span>
             </div>
             <div className="flex justify-between">
               <span>조기상환수수료</span>
@@ -230,7 +270,7 @@ export default function LoanPage() {
             <Separator />
             <p className={`text-xl font-bold ${earlyResult.netSaving > 0 ? "text-green-600" : "text-red-600"}`}>
               {earlyResult.netSaving > 0
-                ? `지금 갚으면 ${formatMoney(earlyResult.netSaving)} 이득`
+                ? `${earlyResult.isPartial ? "일부 상환하면" : "지금 갚으면"} ${formatMoney(earlyResult.netSaving)} 이득`
                 : `수수료가 더 크므로 ${formatMoney(Math.abs(earlyResult.netSaving))} 손해`}
             </p>
             {earlyResult.breakevenMonth > 0 && (

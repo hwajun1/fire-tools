@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/number-input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
@@ -44,47 +44,19 @@ export default function SalaryPage() {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="salary">연봉 (만원)</Label>
-              <Input
-                id="salary"
-                type="number"
-                value={annualSalary}
-                onChange={(e) => setAnnualSalary(Number(e.target.value))}
-                min={0}
-                step={100}
-              />
+              <NumberInput id="salary" value={annualSalary} onChange={setAnnualSalary} />
             </div>
             <div>
               <Label htmlFor="taxfree">비과세액 (월, 만원)</Label>
-              <Input
-                id="taxfree"
-                type="number"
-                value={monthlyTaxFree}
-                onChange={(e) => setMonthlyTaxFree(Number(e.target.value))}
-                min={0}
-                step={10}
-              />
+              <NumberInput id="taxfree" value={monthlyTaxFree} onChange={setMonthlyTaxFree} />
             </div>
             <div>
               <Label htmlFor="dependents">부양가족 수 (본인 포함)</Label>
-              <Input
-                id="dependents"
-                type="number"
-                value={dependents}
-                onChange={(e) => setDependents(Number(e.target.value))}
-                min={1}
-                step={1}
-              />
+              <NumberInput id="dependents" value={dependents} onChange={setDependents} />
             </div>
             <div>
               <Label htmlFor="children">20세 이하 자녀 수</Label>
-              <Input
-                id="children"
-                type="number"
-                value={childrenUnder20}
-                onChange={(e) => setChildrenUnder20(Number(e.target.value))}
-                min={0}
-                step={1}
-              />
+              <NumberInput id="children" value={childrenUnder20} onChange={setChildrenUnder20} />
             </div>
           </CardContent>
         </Card>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/number-input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
@@ -112,19 +112,19 @@ export default function LoanPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <Label htmlFor="principal">대출 원금 (만원)</Label>
-              <Input id="principal" type="number" value={principal} onChange={(e) => setPrincipal(Number(e.target.value))} min={0} step={1000} />
+              <NumberInput id="principal" value={principal} onChange={setPrincipal} />
             </div>
             <div>
               <Label htmlFor="rate">연 이자율 (%)</Label>
-              <Input id="rate" type="number" value={annualRate} onChange={(e) => setAnnualRate(Number(e.target.value))} min={0.1} step={0.1} />
+              <NumberInput id="rate" value={annualRate} onChange={setAnnualRate} />
             </div>
             <div>
               <Label htmlFor="years">대출 기간 (년)</Label>
-              <Input id="years" type="number" value={years} onChange={(e) => setYears(Number(e.target.value))} min={1} step={1} />
+              <NumberInput id="years" value={years} onChange={setYears} />
             </div>
             <div>
               <Label htmlFor="grace">거치 기간 (개월)</Label>
-              <Input id="grace" type="number" value={gracePeriod} onChange={(e) => setGracePeriod(Number(e.target.value))} min={0} step={1} />
+              <NumberInput id="grace" value={gracePeriod} onChange={setGracePeriod} />
             </div>
           </div>
         </CardContent>
@@ -209,11 +209,11 @@ export default function LoanPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <Label htmlFor="repayMonth">조기상환 시점 (개월차)</Label>
-              <Input id="repayMonth" type="number" value={repaymentMonth} onChange={(e) => setRepaymentMonth(Number(e.target.value))} min={1} max={years * 12} step={1} />
+              <NumberInput id="repayMonth" value={repaymentMonth} onChange={setRepaymentMonth} />
             </div>
             <div>
               <Label htmlFor="penalty">조기상환수수료율 (%)</Label>
-              <Input id="penalty" type="number" value={penaltyRate} onChange={(e) => setPenaltyRate(Number(e.target.value))} min={0} step={0.1} />
+              <NumberInput id="penalty" value={penaltyRate} onChange={setPenaltyRate} />
             </div>
             <div>
               <Label>상환 범위</Label>
@@ -235,7 +235,7 @@ export default function LoanPage() {
             {isPartialRepayment && (
               <div>
                 <Label htmlFor="partialAmount">조기상환 금액 (만원)</Label>
-                <Input id="partialAmount" type="number" value={partialAmount} onChange={(e) => setPartialAmount(Number(e.target.value))} min={0} step={100} />
+                <NumberInput id="partialAmount" value={partialAmount} onChange={setPartialAmount} />
               </div>
             )}
           </div>

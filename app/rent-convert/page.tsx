@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/number-input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { YearBadge } from "@/components/year-badge";
@@ -69,30 +69,30 @@ export default function RentConvertPage() {
             {direction === "jeonse-to-monthly" && (
               <div>
                 <Label htmlFor="jeonse">전세금 (만원)</Label>
-                <Input id="jeonse" type="number" value={jeonse} onChange={(e) => setJeonse(Number(e.target.value))} min={0} step={1000} />
+                <NumberInput id="jeonse" value={jeonse} onChange={setJeonse} />
               </div>
             )}
 
             <div>
               <Label htmlFor="deposit">보증금 (만원)</Label>
-              <Input id="deposit" type="number" value={deposit} onChange={(e) => setDeposit(Number(e.target.value))} min={0} step={1000} />
+              <NumberInput id="deposit" value={deposit} onChange={setDeposit} />
             </div>
 
             {direction === "monthly-to-jeonse" && (
               <div>
                 <Label htmlFor="monthly">월세 (만원)</Label>
-                <Input id="monthly" type="number" value={monthlyRent} onChange={(e) => setMonthlyRent(Number(e.target.value))} min={0} step={5} />
+                <NumberInput id="monthly" value={monthlyRent} onChange={setMonthlyRent} />
               </div>
             )}
 
             <div>
               <Label htmlFor="rate">전월세 전환율 (%)</Label>
-              <Input id="rate" type="number" value={conversionRate} onChange={(e) => setConversionRate(Number(e.target.value))} min={0.1} step={0.1} />
+              <NumberInput id="rate" value={conversionRate} onChange={setConversionRate} />
             </div>
 
             <div>
               <Label htmlFor="invest">예상 투자 수익률 (%)</Label>
-              <Input id="invest" type="number" value={investmentReturnRate} onChange={(e) => setInvestmentReturnRate(Number(e.target.value))} min={0} step={0.5} />
+              <NumberInput id="invest" value={investmentReturnRate} onChange={setInvestmentReturnRate} />
             </div>
           </CardContent>
         </Card>

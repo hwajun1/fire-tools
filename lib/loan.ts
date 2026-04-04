@@ -59,8 +59,8 @@ export function calculateEqualPrincipalInterest(
     schedule,
     totalPayment,
     totalInterest: r1(totalPayment - principal),
-    firstPayment: schedule[0].payment,
-    lastPayment: schedule[schedule.length - 1].payment,
+    firstPayment: schedule[0]?.payment ?? 0,
+    lastPayment: schedule[schedule.length - 1]?.payment ?? 0,
   };
 }
 
@@ -95,8 +95,8 @@ export function calculateEqualPrincipal(
     schedule,
     totalPayment,
     totalInterest: r1(totalPayment - principal),
-    firstPayment: schedule[0].payment,
-    lastPayment: schedule[schedule.length - 1].payment,
+    firstPayment: schedule[0]?.payment ?? 0,
+    lastPayment: schedule[schedule.length - 1]?.payment ?? 0,
   };
 }
 
@@ -139,8 +139,8 @@ export function calculateGraduated(
     schedule,
     totalPayment,
     totalInterest: r1(totalPayment - principal),
-    firstPayment: schedule[0].payment,
-    lastPayment: schedule[schedule.length - 1].payment,
+    firstPayment: schedule[0]?.payment ?? 0,
+    lastPayment: schedule[schedule.length - 1]?.payment ?? 0,
   };
 }
 

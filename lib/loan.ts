@@ -203,7 +203,7 @@ export function analyzeEarlyRepayment(input: EarlyRepaymentInput): EarlyRepaymen
   // 원리금균등 기준으로 분석
   const full = calculateEqualPrincipalInterest(principal, annualRate, years, gracePeriod);
 
-  const monthIndex = Math.min(repaymentMonth - 1, full.schedule.length - 1);
+  const monthIndex = Math.max(0, Math.min(repaymentMonth - 1, full.schedule.length - 1));
   const remainingBalance = full.schedule[monthIndex].balance;
 
   // 조기상환 금액 결정 (미지정이면 전액)

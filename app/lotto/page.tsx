@@ -29,6 +29,7 @@ export default function LottoPage() {
   const [fixed, setFixed] = useState<Set<number>>(new Set());
   const [gameCount, setGameCount] = useState(5);
   const [results, setResults] = useState<number[][]>([]);
+  const [copied, setCopied] = useState(false);
 
   const topNumbers = useMemo(() => getTopNumbers(frequency, 10), [frequency]);
   const bottomNumbers = useMemo(() => getBottomNumbers(frequency, 10), [frequency]);
@@ -194,7 +195,23 @@ export default function LottoPage() {
 
           {results.length > 0 && (
             <div className="space-y-2 mt-4">
-              <p className="text-sm font-medium">생성 결과</p>
+              <div className="flex items-center gap-3">
+                <p className="text-sm font-medium">생성 결과</p>
+                <button
+                  onClick={() => {
+                    const text = results
+                      .map((game, i) => `${String.fromCharCode(65 + i)}: ${game.join(", ")}`)
+                      .join("\n");
+                    navigator.clipboard.writeText(text).then(() => {
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    });
+                  }}
+                  className="text-xs px-2 py-1 border rounded hover:bg-gray-100 transition-colors"
+                >
+                  {copied ? "복사됨!" : "클립보드 복사"}
+                </button>
+              </div>
               {results.map((game, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground w-6">{String.fromCharCode(65 + i)}</span>

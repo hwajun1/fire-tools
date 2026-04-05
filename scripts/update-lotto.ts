@@ -1,5 +1,6 @@
 /**
- * 동행복권 API에서 로또 당첨번호를 가져와 data/lotto.json에 저장.
+ * 로또 당첨번호를 가져와 data/lotto.json에 저장.
+ * 소스: smok95.github.io/lotto (GitHub Pages 공개 데이터)
  * 사용법: npx tsx scripts/update-lotto.ts
  */
 import fs from "fs";
@@ -12,56 +13,36 @@ interface LottoRound {
   bonus: number;
 }
 
+interface ApiRound {
+  draw_no: number;
+  date: string;
+  numbers: number[];
+  bonus_no: number;
+}
+
 const DATA_PATH = path.join(process.cwd(), "data", "lotto.json");
-const API_URL = "https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=";
+const ALL_URL = "https://smok95.github.io/lotto/results/all.json";
 
-async function fetchRound(round: number): Promise<LottoRound | null> {
-  const res = await fetch(`${API_URL}${round}`);
-  const data = await res.json();
-  if (data.returnValue !== "success") return null;
-
-  const numbers = [
-    data.drwtNo1, data.drwtNo2, data.drwtNo3,
-    data.drwtNo4, data.drwtNo5, data.drwtNo6,
-  ].sort((a, b) => a - b);
-
+function toRound(api: ApiRound): LottoRound {
   return {
-    round: data.drwNo,
-    date: data.drwNoDate,
-    numbers,
-    bonus: data.bnusNo,
+    round: api.draw_no,
+    date: api.date.split("T")[0], // "2002-12-07T00:00:00Z" → "2002-12-07"
+    numbers: [...api.numbers].sort((a, b) => a - b),
+    bonus: api.bonus_no,
   };
 }
 
 async function main() {
-  let existing: LottoRound[] = [];
-  if (fs.existsSync(DATA_PATH)) {
-    existing = JSON.parse(fs.readFileSync(DATA_PATH, "utf-8"));
-  }
+  console.log("Fetching all lotto data...");
+  const res = await fetch(ALL_URL);
+  if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
 
-  const lastRound = existing.length > 0 ? existing[existing.length - 1].round : 0;
+  const apiData: ApiRound[] = await res.json();
+  const allData = apiData.map(toRound).sort((a, b) => a.round - b.round);
 
-  let current = lastRound + 1;
-  let newRounds: LottoRound[] = [];
-
-  while (true) {
-    const result = await fetchRound(current);
-    if (!result) break;
-    newRounds.push(result);
-    console.log(`Fetched round ${current}: ${result.numbers.join(", ")} + ${result.bonus}`);
-    current++;
-    await new Promise((r) => setTimeout(r, 200));
-  }
-
-  if (newRounds.length === 0) {
-    console.log("No new rounds found.");
-    return;
-  }
-
-  const allData = [...existing, ...newRounds];
   fs.mkdirSync(path.dirname(DATA_PATH), { recursive: true });
   fs.writeFileSync(DATA_PATH, JSON.stringify(allData, null, 2));
-  console.log(`Updated: ${allData.length} total rounds (${newRounds.length} new)`);
+  console.log(`Updated: ${allData.length} total rounds (1~${allData[allData.length - 1].round})`);
 }
 
 main().catch(console.error);

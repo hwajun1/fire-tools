@@ -22,6 +22,11 @@ const tools = [
     description: "원리금균등·원금균등·체증식 비교 + 조기상환 분석",
     href: "/loan",
   },
+  {
+    title: "로또번호 추출기",
+    description: "계획대로 안 될 때의 플랜 B. 당첨 통계 기반 번호 생성",
+    href: "/lotto",
+  },
 ];
 
 export default function Home() {
